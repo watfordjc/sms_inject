@@ -4,6 +4,7 @@
  *
  * @package gammu smsd class
  * @author ikhsan agustian <ikhsan017@gmail.com>
+ * @author John Cook <debcoder-f8cc-16ba@johncook.co.uk>
  * @license Distributed under GNU/GPL
  * @version 0.1
  * @access public
@@ -78,7 +79,11 @@ class sms_inject
 		}
 		$this->msg=$msg;
 		$this->dest=$dest;
-		$this->sendingDateTime=$sendingDateTime;
+		if ($sendingDateTime == '') {
+			$this->sendingDateTime='NOW()';
+		} else {
+			$this->sendingDateTime="'".$sendingDateTime."'";
+		}
 		$this->create_msg();
 		//uncomment to get preview
 		//echo "<pre>Destination : $this->dest\nSender : $sender\nMessage :\n";print_r($this->msg_part);
@@ -100,15 +105,15 @@ class sms_inject
 		{
 			if($number==1)
 			{
-				$query="insert into outbox (`UDH`,`SendingDateTime`,`DestinationNumber`,`TextDecoded`,`MultiPart`,`SenderID`) values ('{$sms['udh']}','{$this->sendingDateTime}','{$this->dest}','{$sms['msg']}','{$multipart}','$sender')";
-				mysql_query($query,$this->res);
-				$id=mysql_fetch_assoc(mysql_query("select last_insert_id() as id",$this->res));
+				$query="insert into outbox (`UDH`,`SendingDateTime`,`DestinationNumber`,`TextDecoded`,`MultiPart`,`SenderID`,`CreatorID`) values ('{$sms['udh']}',{$this->sendingDateTime},'{$this->dest}','{$sms['msg']}','{$multipart}','$sender','sms_inject.php')";
+				$this->res->query($query);
+				$id=mysqli_fetch_assoc($this->res->query("select last_insert_id() as id"));
 				$id=$id['id'];
 			}
 			else
 			{
 				$query="insert into outbox_multipart (`UDH`,`SequencePosition`,`TextDecoded`,`ID`) values ('{$sms['udh']}','{$number}','{$sms['msg']}','{$id}')";
-				mysql_query($query,$this->res);
+				$this->res->query($query);
 			}
 		}
 	}

@@ -3,8 +3,7 @@
 if(isset($_POST['number']))
 {
 	include 'sms_inject.php';
-	$mysql_res = mysql_connect('localhost','root','');
-	mysql_select_db('gammu',$mysql_res);
+	$mysql_res = mysqli_connect('localhost','root','','gammu');
 
 	$smsd=new sms_inject($mysql_res);
 	$smsd->mass_sms(mysql_escape_string($_POST['msg']),$_POST['number']);
